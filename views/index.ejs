@@ -1,0 +1,89 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="header overlay">
+        <h1><%= header %></h1>
+        <form action="/" method="post">
+            <input type="text" name="tasks" id="myInput" placeholder="New Tasks..." autocomplete="off">
+            <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Task List</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <tr>
+                <%  for (let i = 0; i < newListTasks.length ; i++) { %>
+                <td><input type="checkbox" id="checkbox_<%= newListTasks[i].id %>" name="taskId" value="<%= newListTasks[i].id %>"></td>
+                <td>
+                    <input type="hidden" name="editTaskId" value="<%= newListTasks[i].id %>">
+                    <input type="text" id="taskInput_<%= newListTasks[i].id %>" name="updatedTask" value="<%= newListTasks[i].task %>" disabled data-original-value="<%= newListTasks[i].task %>">
+                </td>
+                <td>
+                    <form id="editForm_<%= newListTasks[i].id %>" action="/edit" method="post">
+                        <div class="btn-group" role="group" aria-label="Task Actions">
+                            <button type="button" class="btn btn-warning edit edit_<%= newListTasks[i].id %>" onclick="toggleEditMode('<%= newListTasks[i].id %>')" name="editTaskId" value="<%= newListTasks[i].id %>">Edit</button>
+                            <button type="button" class="btn btn-success save save_<%= newListTasks[i].id %>" style="display: none;" onclick="saveTask('<%= newListTasks[i].id %>')" value="<%= newListTasks[i].id %>">Save</button>
+                            <button type="button" class="btn btn-secondary cancel cancel_<%= newListTasks[i].id %>" style="display: none;" data-task-id="<%= newListTasks[i].id %>">Cancel</button>
+                            <button type="button" class="btn btn-danger delete" onclick="submitDeleteForm('<%= newListTasks[i].id %>')" name="taskId" value="<%= newListTasks[i].id %>">Delete</button>
+                        </div>
+                    </form>
+                </td>
+                    <form id="deleteForm_<%= newListTasks[i].id %>" action="/remove" method="post">
+                        <input type="hidden" name="taskId" value="<%= newListTasks[i].id %>">
+                    </form>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+    <script language="javascript">
+
+        function submitDeleteForm(taskId) {
+            $("#deleteForm_" + taskId).submit();
+        };
+
+        $(document).ready(function(){
+            $(".cancel,.save").hide();
+            $(".edit").on('click', function() {
+                toggleEditMode($(this).data('task-id'));
+            });
+            $(".save").on('click', function() {
+                saveTask($(this).data('task-id'));
+            });
+            $(".cancel").on('click', function() {
+                cancelEdit($(this).data('task-id'));
+            });
+        });
+        function toggleEditMode(taskId) {
+            $(`.edit_${taskId}`).toggle();
+            $(`.save_${taskId}`).toggle();
+            $(`.cancel_${taskId}`).toggle();
+
+            const inputField = $(`#taskInput_${taskId}`);
+            inputField.prop("disabled", !inputField.prop("disabled"));
+
+            if (!inputField.prop("disabled")) {
+                inputField.focus();
+            };
+        };
+
+        function saveTask(taskId) {
+            toggleEditMode(taskId);
+        };
+
+        function cancelEdit(taskId) {
+            const inputField = $(`#taskInput_${taskId}`);
+            const originalValue = inputField.data('original-value');
+            inputField.val(originalValue);
+
+            toggleEditMode(taskId);
+        };
+
+    </script>
+
+<%- include("partials/footer.ejs") %>
+
